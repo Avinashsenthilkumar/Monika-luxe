@@ -1,0 +1,277 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand: navy, gold (from the logo) and white */
+  --color-white: #ffffff;
+  --color-mist: #f3f5f9;
+  --color-navy: #0c1d3a;
+  --color-navy-deep: #06122a;
+  --color-gold: #c9a24d;
+  --color-gold-deep: #94722a;
+  --color-gold-light: #e6cd8f;
+  --color-slate: #6f7d97;
+  --color-line: rgb(12 29 58 / 0.14);
+  --color-line-light: rgb(255 255 255 / 0.16);
+
+  --font-serif: var(--font-instrument), "Times New Roman", serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --text-display: clamp(3rem, 8.4vw, 9.5rem);
+  --text-display--line-height: 0.92;
+  --text-headline: clamp(2.4rem, 5.2vw, 5.6rem);
+  --text-headline--line-height: 1;
+
+  --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
+  --radius-none: 0;
+}
+
+/* ---------------- Base ---------------- */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-padding-top: 6rem;
+  }
+
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  body {
+    background: var(--color-navy-deep);
+    color: var(--color-white);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--color-gold);
+    color: var(--color-navy-deep);
+  }
+
+  :focus-visible {
+    outline: 1.5px solid var(--color-gold);
+    outline-offset: 3px;
+  }
+
+  img {
+    user-select: none;
+  }
+}
+
+/* ---------------- Utilities ---------------- */
+
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+@utility hairline {
+  height: 1px;
+  background: currentColor;
+  opacity: 0.18;
+}
+
+@utility container-luxe {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 92rem;
+  padding-inline: 1rem;
+  @media (width >= 48rem) {
+    padding-inline: 2.5rem;
+  }
+  @media (width >= 80rem) {
+    padding-inline: 4rem;
+  }
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility blueprint-grid {
+  background-image:
+    linear-gradient(rgb(12 29 58 / 0.06) 1px, transparent 1px), linear-gradient(90deg, rgb(12 29 58 / 0.06) 1px, transparent 1px),
+    linear-gradient(rgb(12 29 58 / 0.03) 1px, transparent 1px), linear-gradient(90deg, rgb(12 29 58 / 0.03) 1px, transparent 1px);
+  background-size:
+    120px 120px,
+    120px 120px,
+    24px 24px,
+    24px 24px;
+}
+
+/* ---------------- Motion primitives ---------------- */
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes rise {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes glow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scroll-cue {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  45% {
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+  55% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+}
+
+@layer components {
+  .reveal-line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.06em;
+  }
+  .reveal-line > span {
+    display: block;
+    will-change: transform;
+  }
+
+  .draw-path {
+    stroke-dasharray: var(--len, 2000);
+    stroke-dashoffset: var(--len, 2000);
+  }
+
+  .animate-draw {
+    animation: draw 2.6s var(--ease-luxe) forwards;
+  }
+  .animate-rise {
+    animation: rise 1.2s var(--ease-luxe) both;
+  }
+  .animate-fade {
+    animation: fade-in 1.2s var(--ease-luxe) both;
+  }
+  .animate-glow {
+    animation: glow 1.6s ease-out both;
+  }
+  .animate-scroll-cue {
+    animation: scroll-cue 2.4s var(--ease-luxe) infinite;
+  }
+
+  .page-enter {
+    animation: fade-in 0.7s var(--ease-luxe) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .draw-path {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---------------- Intro overlay ---------------- */
+@keyframes intro-exit {
+  to {
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+  }
+}
+.intro-overlay {
+  clip-path: inset(0 0 0 0);
+  animation: intro-exit 0.85s var(--ease-luxe) 1.35s forwards;
+  pointer-events: none;
+}
+html[data-intro-seen] .intro-overlay {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro-overlay {
+    display: none;
+  }
+}
+
+/* normalised stroke drawing (elements with pathLength="1") */
+@layer components {
+  .draw-norm {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw 2.4s var(--ease-luxe) forwards;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .draw-norm {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* pause drawing animations until their container scrolls into view */
+[data-inview="false"] .draw-norm,
+[data-inview="false"] .animate-fade {
+  animation-play-state: paused;
+}
+
+/* ---------------- Gold headings ---------------- */
+@layer components {
+  .text-display,
+  .text-headline {
+    color: var(--color-gold);
+  }
+  :is(.bg-white, .bg-mist) :is(.text-display, .text-headline) {
+    color: var(--color-gold-deep);
+  }
+  /* metallic gold like the logo, for the biggest headlines */
+  .gold-foil {
+    background: linear-gradient(100deg, #9c7429 0%, #e9cf8c 28%, #c9a24d 50%, #f3dfa6 68%, #a67d2f 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .gold-foil em {
+    color: transparent;
+  }
+}
