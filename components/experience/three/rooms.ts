@@ -111,7 +111,7 @@ export function buildRooms(mats: Materials): RoomsRig {
       s.position.set(...from);
       s.target.position.set(...to);
       s.castShadow = true;
-      s.shadow.mapSize.set(1024, 1024);
+      s.shadow.mapSize.set(768, 768);
       s.shadow.bias = -0.0005;
       s.shadow.normalBias = 0.02;
       s.userData.base = intensity;

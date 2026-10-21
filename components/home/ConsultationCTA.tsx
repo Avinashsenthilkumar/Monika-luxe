@@ -5,7 +5,7 @@ import { company, whatsappLink } from "@/lib/content";
 export default function ConsultationCTA({ id = "home-enquiry" }: { id?: string }) {
   return (
     <section id={id} aria-labelledby={`${id}-title`} className="relative bg-navy-deep text-white">
-      <div className="container-luxe grid gap-16 py-28 md:grid-cols-12 md:py-40">
+      <div className="container-luxe grid gap-16 py-20 md:grid-cols-12 md:py-28">
         <div className="md:col-span-5">
           <Reveal>
             <p className="eyebrow mb-8 flex items-center gap-4 text-gold">

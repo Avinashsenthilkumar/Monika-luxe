@@ -40,7 +40,7 @@ export default function Header() {
         className={cn(
           "fixed inset-x-0 top-0 z-50 text-white transition-[background-color,padding,border-color,backdrop-filter] duration-700 ease-[var(--ease-luxe)]",
           compact
-            ? "border-b border-line-light bg-navy-deep/85 py-3 backdrop-blur-md"
+            ? "border-b border-line-light bg-navy-deep/95 py-3"
             : "border-b border-transparent bg-gradient-to-b from-navy-deep/60 to-transparent py-6 md:py-8",
         )}
       >
@@ -62,7 +62,7 @@ export default function Header() {
             </span>
           </Link>
 
-          <nav aria-label="Primary" className="hidden lg:block">
+          <nav aria-label="Primary" className="hidden xl:block">
             <ul className="flex items-center gap-7 xl:gap-9">
               {navigation.map((item) => (
                 <li key={item.href}>
@@ -94,7 +94,7 @@ export default function Header() {
               onClick={() => setOpen(true)}
               aria-expanded={open}
               aria-controls="mobile-menu"
-              className="flex h-11 w-11 flex-col items-center justify-center gap-[7px] lg:hidden"
+              className="flex h-11 w-11 flex-col items-center justify-center gap-[7px] xl:hidden"
             >
               <span className="sr-only">Open menu</span>
               <span aria-hidden className="h-px w-7 bg-white" />

@@ -37,9 +37,7 @@ export default function ProjectCard({
           className="object-cover transition-transform duration-[1600ms] ease-[var(--ease-luxe)] group-hover:scale-[1.06]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/70 via-transparent to-transparent opacity-80 transition-opacity duration-700 group-hover:opacity-100" />
-        <span className="eyebrow absolute left-5 top-5 bg-navy-deep/60 px-3 py-1.5 text-white backdrop-blur-sm">
-          {project.category}
-        </span>
+        <span className="eyebrow absolute left-5 top-5 bg-navy-deep/60 px-3 py-1.5 text-white">{project.category}</span>
         <span className="eyebrow absolute bottom-5 right-5 text-white/80">{project.count} images</span>
       </div>
       <div className="mt-5 flex items-baseline justify-between gap-6">

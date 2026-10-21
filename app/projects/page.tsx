@@ -26,7 +26,7 @@ export default function ProjectsPage() {
         intro={<p>A selection of interiors by Monika Luxe, grouped by space. Select a collection to view its gallery.</p>}
         crumbs={[{ name: "Projects", path: "/projects" }]}
       />
-      <section aria-label="Portfolio collections" className="bg-navy-deep pb-28 text-white md:pb-40">
+      <section aria-label="Portfolio collections" className="bg-navy-deep pb-20 text-white md:pb-28">
         <div className="container-luxe">
           <ProjectGrid projects={projects.map(toCardData)} />
         </div>

@@ -34,7 +34,7 @@ export default function AboutPage() {
 
       {/* Founder */}
       <section aria-labelledby="founder-title" className="bg-white text-navy">
-        <div className="container-luxe grid gap-14 py-28 md:grid-cols-12 md:py-40">
+        <div className="container-luxe grid gap-14 py-20 md:grid-cols-12 md:py-28">
           <Reveal className="md:col-span-5">
             <div className="relative aspect-[4/5] overflow-hidden bg-gold-light">
               <Image
@@ -77,7 +77,7 @@ export default function AboutPage() {
 
       {/* Team */}
       <section id="team" aria-labelledby="team-title" className="bg-mist text-navy">
-        <div className="container-luxe py-28 md:py-40">
+        <div className="container-luxe py-20 md:py-28">
           <Reveal>
             <p className="eyebrow mb-8 flex items-center gap-4 text-slate">
               <span aria-hidden className="h-px w-10 bg-current" /> The Team

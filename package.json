@@ -9,7 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "sequence": "node scripts/make-sequence.mjs"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.0",

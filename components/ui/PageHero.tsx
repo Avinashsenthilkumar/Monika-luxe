@@ -17,7 +17,7 @@ export default function PageHero({
 }) {
   const all = [{ name: "Home", path: "/" }, ...crumbs];
   return (
-    <section className="relative overflow-hidden bg-navy-deep pb-20 pt-40 text-white md:pb-28 md:pt-52">
+    <section className="relative overflow-hidden bg-navy-deep pb-14 pt-32 text-white md:pb-20 md:pt-44">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(all)) }} />
       <div
         aria-hidden

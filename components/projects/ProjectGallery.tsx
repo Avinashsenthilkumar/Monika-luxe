@@ -94,7 +94,7 @@ export default function ProjectGallery({ images, title }: { images: ResolvedImag
           role="dialog"
           aria-modal="true"
           aria-label={`${title} — image ${open + 1} of ${images.length}`}
-          className="fixed inset-0 z-[90] flex flex-col bg-navy-deep/95 text-white backdrop-blur"
+          className="fixed inset-0 z-[90] flex flex-col bg-navy-deep/95 text-white"
         >
           <div className="flex items-center justify-between px-4 py-4 md:px-8">
             <p className="eyebrow text-white/70">

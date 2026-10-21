@@ -8,6 +8,7 @@ import FeaturedProjects from "@/components/home/FeaturedProjects";
 import Testimonials from "@/components/home/Testimonials";
 import ConsultationCTA from "@/components/home/ConsultationCTA";
 import { resolveId, resolveIds } from "@/lib/assets.server";
+import { readSequence } from "@/lib/sequence.server";
 import { getProject, projects, services } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
 import { toCardData } from "@/lib/projects";
@@ -38,7 +39,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <ArchitecturalJourney rooms={rooms} />
+      <ArchitecturalJourney rooms={rooms} sequence={readSequence()} />
       <StudioIntroduction founder={resolveId("teamMonika")} />
       <ServicesShowcase items={showcase} />
       <FeaturedProjects projects={projects.map(toCardData)} />

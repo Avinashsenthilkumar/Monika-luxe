@@ -4,7 +4,7 @@ import { philosophy } from "@/lib/content";
 export default function Philosophy() {
   return (
     <section id="philosophy" aria-labelledby="philosophy-title" className="relative overflow-hidden bg-navy-deep text-white">
-      <div className="container-luxe py-28 md:py-40">
+      <div className="container-luxe py-20 md:py-28">
         <div className="grid gap-16 md:grid-cols-12">
           <div className="md:sticky md:top-32 md:col-span-5 md:self-start">
             <Reveal>

@@ -13,7 +13,7 @@ export default function ImageReveal({
   sizes = "100vw",
   priority = false,
   direction = "up",
-  parallax = true,
+  parallax = false,
 }: {
   image: ResolvedImage;
   className?: string;

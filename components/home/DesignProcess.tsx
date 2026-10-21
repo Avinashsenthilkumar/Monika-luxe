@@ -54,7 +54,7 @@ export default function DesignProcess() {
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.07] [background-image:linear-gradient(rgb(255_255_255/0.6)_1px,transparent_1px),linear-gradient(90deg,rgb(255_255_255/0.6)_1px,transparent_1px)] [background-size:64px_64px]"
       />
-      <div className="container-luxe relative py-28 md:py-40">
+      <div className="container-luxe relative py-20 md:py-28">
         <div className="grid gap-16 md:grid-cols-12">
           <div className="md:sticky md:top-32 md:col-span-5 md:self-start">
             <p className="eyebrow mb-8 flex items-center gap-4 text-gold">

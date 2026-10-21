@@ -62,7 +62,7 @@ export default function MobileNavigation({
       aria-hidden={!open}
       inert={!open}
       className={cn(
-        "fixed inset-0 z-[70] flex flex-col bg-navy-deep text-white transition-[clip-path] duration-700 ease-[var(--ease-luxe)] lg:hidden",
+        "fixed inset-0 z-[70] flex flex-col bg-navy-deep text-white transition-[clip-path] duration-700 ease-[var(--ease-luxe)] xl:hidden",
         open ? "[clip-path:inset(0_0_0_0)]" : "pointer-events-none [clip-path:inset(0_0_100%_0)]",
       )}
     >

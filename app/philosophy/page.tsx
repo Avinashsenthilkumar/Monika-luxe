@@ -29,7 +29,7 @@ export default function PhilosophyPage() {
       />
       <Philosophy />
       <section aria-labelledby="values-title" className="bg-white text-navy">
-        <div className="container-luxe py-28 md:py-36">
+        <div className="container-luxe py-20 md:py-28">
           <Reveal>
             <p className="eyebrow mb-8 flex items-center gap-4 text-slate">
               <span aria-hidden className="h-px w-10 bg-current" /> What we hold to

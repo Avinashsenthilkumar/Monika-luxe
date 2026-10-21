@@ -1,10 +1,5 @@
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
-import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import { GTAOPass } from "three/examples/jsm/postprocessing/GTAOPass.js";
-import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
-import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { easeInOutCubic, easeOutCubic, range } from "@/lib/utils";
 import { PHASE, ROOM_WINDOWS } from "../chapters";
 import { buildHouse } from "./house";
@@ -28,14 +23,18 @@ export interface Engine {
 export function createEngine(container: HTMLElement, quality: "high" | "low", onError?: () => void): Engine {
   const high = quality === "high";
   const renderer = new THREE.WebGLRenderer({
-    antialias: !high,
+    antialias: high,
     powerPreference: "high-performance",
     alpha: false,
     stencil: false,
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, high ? 1.6 : 1.25));
+  const cores = navigator.hardwareConcurrency || 4;
+  const maxDpr = high ? (cores >= 8 ? 1.5 : 1.25) : 1;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // The scene is static most of the time: shadows are re-rendered only while things move or lights change.
+  renderer.shadowMap.autoUpdate = false;
   renderer.localClippingEnabled = true;
   renderer.toneMapping = THREE.NeutralToneMapping;
   renderer.toneMappingExposure = 1;
@@ -81,25 +80,6 @@ export function createEngine(container: HTMLElement, quality: "high" | "low", on
   const fogDay = new THREE.Color("#dfe8f0");
   const fogDusk = new THREE.Color("#16233d");
 
-  // post-processing (desktop): MSAA + ground-truth AO + subtle bloom on lights
-  let composer: EffectComposer | null = null;
-  let gtao: GTAOPass | null = null;
-  let bloom: UnrealBloomPass | null = null;
-  let target: THREE.WebGLRenderTarget | null = null;
-  if (high) {
-    target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
-    composer = new EffectComposer(renderer, target);
-    composer.addPass(new RenderPass(scene, camera));
-    gtao = new GTAOPass(scene, camera, 1, 1);
-    gtao.output = GTAOPass.OUTPUT.Default;
-    gtao.blendIntensity = 0.9;
-    gtao.updateGtaoMaterial({ radius: 0.6, distanceExponent: 1.4, thickness: 1, scale: 1 });
-    composer.addPass(gtao);
-    bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.3, 0.55, 0.92);
-    composer.addPass(bloom);
-    composer.addPass(new OutputPass());
-  }
-
   const sunDay = new THREE.Vector3(-18, 30, 16);
   const sunDusk = new THREE.Vector3(-34, 7, 8);
   const sunColDay = new THREE.Color("#fff4e2");
@@ -119,11 +99,12 @@ export function createEngine(container: HTMLElement, quality: "high" | "low", on
     width = Math.max(1, container.clientWidth);
     height = Math.max(1, container.clientHeight);
     renderer.setSize(width, height, false);
-    composer?.setSize(width, height);
+    renderer.shadowMap.needsUpdate = true;
     request(progress, true);
   };
 
   let progress = 0;
+  let lastShadowKey = "";
   let frame = 0;
   let lastRendered = -1;
 
@@ -173,10 +154,12 @@ export function createEngine(container: HTMLElement, quality: "high" | "low", on
     const interiorGlow = active ? 1 : lights;
     for (const e of mats.emissive) e.mat.emissiveIntensity = e.max * (e.group === "interior" ? interiorGlow : lights);
 
-    if (gtao) gtao.enabled = p > PHASE.structure[0] + 0.02;
-    if (bloom) {
-      bloom.enabled = interiorGlow > 0.02;
-      bloom.strength = 0.12 + 0.3 * interiorGlow;
+    // shadows: refresh only while geometry or lighting is changing, or when the room changes
+    const shadowKey =
+      active ?? (p < PHASE.structure[0] || p > PHASE.dusk[1] + 0.03 ? `still-${p < 0.5 ? "a" : "b"}` : `live-${p}`);
+    if (shadowKey !== lastShadowKey) {
+      lastShadowKey = shadowKey;
+      renderer.shadowMap.needsUpdate = true;
     }
 
     path.apply(camera, p, width / height);
@@ -187,8 +170,7 @@ export function createEngine(container: HTMLElement, quality: "high" | "low", on
     if (progress === lastRendered) return;
     lastRendered = progress;
     update(progress);
-    if (composer) composer.render();
-    else renderer.render(scene, camera);
+    renderer.render(scene, camera);
   };
 
   function request(p: number, force = false) {
@@ -208,10 +190,6 @@ export function createEngine(container: HTMLElement, quality: "high" | "low", on
     textures.dispose();
     sky.dispose();
     envTex.dispose();
-    composer?.dispose();
-    target?.dispose();
-    gtao?.dispose();
-    bloom?.dispose();
     scene.clear();
     renderer.dispose();
     canvas.remove();

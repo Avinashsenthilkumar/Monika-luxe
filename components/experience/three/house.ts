@@ -501,7 +501,7 @@ export function buildHouse(opts: { mats: Materials; clayPlane: THREE.Plane; qual
   const hemi = new THREE.HemisphereLight("#fffaf0", "#b9b4a8", 1.4);
   const sun = new THREE.DirectionalLight("#fff6e8", 2.8);
   sun.castShadow = true;
-  const sm = quality === "high" ? 4096 : 2048;
+  const sm = quality === "high" ? 2048 : 1024;
   sun.shadow.mapSize.set(sm, sm);
   Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 1, far: 140 });
   sun.shadow.camera.updateProjectionMatrix();
@@ -529,7 +529,7 @@ export function buildHouse(opts: { mats: Materials; clayPlane: THREE.Plane; qual
   livingSpot.position.set(5, 3.6, 1.5);
   livingSpot.target.position.set(5, 0.6, -2);
   livingSpot.castShadow = true;
-  livingSpot.shadow.mapSize.set(1024, 1024);
+  livingSpot.shadow.mapSize.set(512, 512);
   livingSpot.shadow.bias = -0.0005;
   living.add(livingSpot, livingSpot.target);
   const livingLights: THREE.Light[] = [

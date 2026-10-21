@@ -35,7 +35,7 @@ export default function BlueprintScene() {
       {/* title block */}
       <div
         data-bp-fade
-        className="absolute bottom-10 right-6 hidden w-[19rem] border border-navy/40 bg-white/70 font-mono text-[0.62rem] uppercase tracking-[0.14em] backdrop-blur-[2px] md:right-14 md:bottom-16 md:block"
+        className="absolute bottom-10 right-6 hidden w-[19rem] border border-navy/40 bg-white/70 font-mono text-[0.62rem] uppercase tracking-[0.14em] md:right-14 md:bottom-16 md:block"
       >
         {[
           ["Project", "Contemporary residence"],

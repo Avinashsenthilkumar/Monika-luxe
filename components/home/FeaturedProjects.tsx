@@ -6,7 +6,7 @@ export default function FeaturedProjects({ projects }: { projects: ProjectCardDa
   const [a, b, c, d] = projects;
   return (
     <section aria-labelledby="work-title" className="bg-navy-deep text-white">
-      <div className="container-luxe py-28 md:py-40">
+      <div className="container-luxe py-20 md:py-28">
         <div className="mb-16 flex flex-col justify-between gap-8 md:mb-24 md:flex-row md:items-end">
           <div>
             <Reveal>

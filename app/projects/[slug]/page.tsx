@@ -74,7 +74,7 @@ export default async function ProjectPage({ params }: { params: Params }) {
         </dl>
       </PageHero>
 
-      <section aria-label={`${p.title} gallery`} className="bg-navy-deep pb-28 text-white md:pb-40">
+      <section aria-label={`${p.title} gallery`} className="bg-navy-deep pb-20 text-white md:pb-28">
         <div className="container-luxe">
           <ProjectGallery images={images} title={p.title} />
           <div className="mt-20 flex flex-col gap-6 border-t border-line-light pt-10 md:flex-row md:items-center md:justify-between">

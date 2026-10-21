@@ -14,13 +14,22 @@ import JourneyProgress from "./JourneyProgress";
 import PlanDrawing from "./PlanDrawing";
 import SceneCaption from "./SceneCaption";
 import type { SceneBridge } from "./HouseConstructionScene";
+import type { SequenceManifest } from "@/lib/sequence";
 
 // Three.js is split into its own chunk and never rendered on the server.
 const HouseConstructionScene = dynamic(() => import("./HouseConstructionScene"), { ssr: false });
+const SequenceScene = dynamic(() => import("./SequenceScene"), { ssr: false });
 
 const captionChapters = chapters.filter((c) => c.id !== "interiors" && c.id !== "final");
 
-export default function ArchitecturalJourney({ rooms }: { rooms: RoomSlide[] }) {
+export default function ArchitecturalJourney({
+  rooms,
+  sequence = null,
+}: {
+  rooms: RoomSlide[];
+  /** when a rendered walkthrough exists, it replaces the real-time 3D model */
+  sequence?: SequenceManifest | null;
+}) {
   const reduced = usePrefersReducedMotion();
   const webgl = useWebGLSupport();
   const isMobile = useMediaQuery("(max-width: 767px)");
@@ -33,7 +42,7 @@ export default function ArchitecturalJourney({ rooms }: { rooms: RoomSlide[] }) 
   const stage = useRef<HTMLDivElement>(null);
   const bridge = useRef<SceneBridge>({ progress: 0 });
 
-  const useFallback = reduced || webgl === false || failed;
+  const useFallback = reduced || failed || (!sequence && webgl === false);
 
   const onReady = useCallback(() => setReady(true), []);
   const onError = useCallback(() => setFailed(true), []);
@@ -48,7 +57,7 @@ export default function ArchitecturalJourney({ rooms }: { rooms: RoomSlide[] }) 
 
   // Load the 3D chunk only when the section approaches, and only once the main thread is idle.
   useEffect(() => {
-    if (useFallback || webgl !== true) return;
+    if (useFallback || (!sequence && webgl !== true)) return;
     const el = section.current;
     if (!el) return;
     let handle = 0;
@@ -68,7 +77,7 @@ export default function ArchitecturalJourney({ rooms }: { rooms: RoomSlide[] }) 
       if (hasIdle) window.cancelIdleCallback(handle);
       else window.clearTimeout(handle);
     };
-  }, [useFallback, webgl]);
+  }, [useFallback, webgl, sequence]);
 
   useGSAP(
     () => {
@@ -83,9 +92,9 @@ export default function ArchitecturalJourney({ rooms }: { rooms: RoomSlide[] }) 
         scrollTrigger: {
           trigger: root,
           start: "top top",
-          end: () => `+=${Math.round(window.innerHeight * (isMobile ? 6.5 : 8))}`,
+          end: () => `+=${Math.round(window.innerHeight * (isMobile ? 5 : 6))}`,
           pin: stageEl,
-          scrub: 0.8,
+          scrub: 0.5,
           anticipatePin: 1,
           invalidateOnRefresh: true,
         },
@@ -185,7 +194,12 @@ export default function ArchitecturalJourney({ rooms }: { rooms: RoomSlide[] }) 
       </p>
       <div ref={stage} data-tone="ink" className="group/stage relative h-svh w-full overflow-hidden bg-white">
         <div className="absolute inset-0">
-          {mountScene && <HouseConstructionScene bridge={bridge} quality={quality} onReady={onReady} onError={onError} />}
+          {mountScene &&
+            (sequence ? (
+              <SequenceScene bridge={bridge} sequence={sequence} mobile={isMobile} onReady={onReady} />
+            ) : (
+              <HouseConstructionScene bridge={bridge} quality={quality} onReady={onReady} onError={onError} />
+            ))}
         </div>
 
         {/* Poster until WebGL has rendered its first frame */}
@@ -199,7 +213,7 @@ export default function ArchitecturalJourney({ rooms }: { rooms: RoomSlide[] }) 
           <PlanDrawing className="h-[62%] w-auto max-w-[88%] opacity-70" />
         </div>
 
-        <BlueprintScene />
+        {(!sequence || sequence.blueprintSheet) && <BlueprintScene />}
         <div
           data-scrim
           aria-hidden

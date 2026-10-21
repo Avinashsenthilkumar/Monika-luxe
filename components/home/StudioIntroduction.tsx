@@ -7,7 +7,7 @@ import { company } from "@/lib/content";
 export default function StudioIntroduction({ founder }: { founder: ResolvedImage }) {
   return (
     <section id="studio" aria-labelledby="studio-title" className="relative bg-white text-navy">
-      <div className="container-luxe py-28 md:py-40">
+      <div className="container-luxe py-20 md:py-28">
         <div className="grid gap-16 md:grid-cols-12">
           <div className="md:col-span-7">
             <Reveal>

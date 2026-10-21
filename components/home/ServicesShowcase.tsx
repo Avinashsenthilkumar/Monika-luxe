@@ -14,7 +14,7 @@ export interface ServiceWithImage extends Service {
 export default function ServicesShowcase({ items }: { items: ServiceWithImage[] }) {
   return (
     <section aria-labelledby="services-title" className="bg-mist text-navy">
-      <div className="container-luxe pb-10 pt-28 md:pt-40">
+      <div className="container-luxe pb-10 pt-20 md:pt-28">
         <Reveal>
           <p className="eyebrow mb-8 flex items-center gap-4 text-slate">
             <span aria-hidden className="h-px w-10 bg-current" /> Services

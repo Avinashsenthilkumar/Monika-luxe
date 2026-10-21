@@ -4,7 +4,7 @@ import { testimonials } from "@/lib/content";
 export default function Testimonials() {
   return (
     <section id="testimonials" aria-labelledby="testimonials-title" className="bg-white text-navy">
-      <div className="container-luxe py-28 md:py-40">
+      <div className="container-luxe py-20 md:py-28">
         <Reveal>
           <p className="eyebrow mb-8 flex items-center gap-4 text-slate">
             <span aria-hidden className="h-px w-10 bg-current" /> In Their Words

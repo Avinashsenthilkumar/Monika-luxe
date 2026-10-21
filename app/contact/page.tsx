@@ -34,7 +34,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Sear
       />
 
       <section id="enquiry" aria-labelledby="enquiry-title" className="scroll-mt-24 bg-navy-deep text-white">
-        <div className="container-luxe grid gap-16 pb-28 md:grid-cols-12 md:pb-40">
+        <div className="container-luxe grid gap-16 pb-20 md:grid-cols-12 md:pb-28">
           <aside className="md:col-span-4">
             <h2 id="enquiry-title" className="sr-only">
               Project enquiry
