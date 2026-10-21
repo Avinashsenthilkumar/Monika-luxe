@@ -12,7 +12,15 @@ export const PHASE = {
   dusk: [0.4, 0.52],
   enter: [0.5, 0.62],
   interiors: [0.62, 0.9],
-  final: [0.9, 1],
+  final: [0.895, 1],
+} as const satisfies Record<string, readonly [number, number]>;
+
+/** Interior chapter: the camera stays in the villa's living room, then cuts to each furnished room. */
+export const ROOM_WINDOWS = {
+  living: [0.62, 0.69],
+  kitchen: [0.69, 0.76],
+  bedroom: [0.76, 0.83],
+  office: [0.83, 0.895],
 } as const satisfies Record<string, readonly [number, number]>;
 
 export interface Chapter {
@@ -69,7 +77,7 @@ export const chapters: Chapter[] = [
     label: "Interiors",
     title: "Room by room.",
     text: "",
-    at: [0.62, 0.9],
+    at: [0.62, 0.895],
     tone: "ivory",
   },
   {
@@ -78,7 +86,7 @@ export const chapters: Chapter[] = [
     label: "Reveal",
     title: "Your Vision. Our Craft.",
     text: "",
-    at: [0.9, 1.0001],
+    at: [0.895, 1.0001],
     tone: "ivory",
   },
 ];

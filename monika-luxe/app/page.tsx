@@ -27,9 +27,9 @@ function room(slug: string, title: string, kicker: string, imageIndex = 0): Room
 
 export default function HomePage() {
   const rooms = [
+    room("living-rooms", "The Living Room", "Living rooms"),
     room("kitchens", "The Kitchen", "Modular kitchens"),
     room("bedrooms", "The Bedroom", "Bedrooms"),
-    room("living-rooms", "The Living Room", "Living rooms"),
     room("office-spaces", "The Workspace", "Office spaces"),
   ].filter((r): r is RoomSlide => r !== null);
 

@@ -54,8 +54,8 @@ npm run build && npm start
 
 ```
 app/                     routes (/, /about, /services, /services/[slug], /projects, /projects/[slug], /contact, /api/enquiries)
-components/experience/   the scroll film — ArchitecturalJourney (GSAP timeline), HouseConstructionScene (R3F canvas),
-                         three/buildHouse.ts (procedural residence), three/cameraPath.ts, overlays, fallback
+components/experience/   the scroll film — ArchitecturalJourney (GSAP timeline), HouseConstructionScene (React wrapper),
+                         three/engine.ts (renderer + post-processing), house.ts (villa), rooms.ts (interiors), kit.ts, sky.ts, cameraPath.ts
 components/home/         home page sections
 components/projects/     grid, card, gallery + lightbox, before/after slider
 components/forms/        ConsultationForm

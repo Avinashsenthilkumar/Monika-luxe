@@ -6,7 +6,7 @@ import { gsap, useGSAP } from "@/lib/gsap";
 import { useMediaQuery, usePrefersReducedMotion, useWebGLSupport } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 import BlueprintScene from "./BlueprintScene";
-import { chapters, PHASE } from "./chapters";
+import { chapters, PHASE, ROOM_WINDOWS } from "./chapters";
 import ExperienceFallback from "./ExperienceFallback";
 import FinalReveal from "./FinalReveal";
 import InteriorRevealScene, { type RoomSlide } from "./InteriorRevealScene";
@@ -15,7 +15,7 @@ import PlanDrawing from "./PlanDrawing";
 import SceneCaption from "./SceneCaption";
 import type { SceneBridge } from "./HouseConstructionScene";
 
-// Three.js + R3F are split into their own chunk and never rendered on the server.
+// Three.js is split into its own chunk and never rendered on the server.
 const HouseConstructionScene = dynamic(() => import("./HouseConstructionScene"), { ssr: false });
 
 const captionChapters = chapters.filter((c) => c.id !== "interiors" && c.id !== "final");
@@ -98,9 +98,7 @@ export default function ArchitecturalJourney({ rooms }: { rooms: RoomSlide[] }) 
       const sync = () => {
         const p = tl.progress();
         bridge.current.progress = p;
-        // The canvas is fully covered by the interior photographs in this window — skip rendering.
-        const covered = p > PHASE.interiors[0] + 0.03 && p < PHASE.final[0] - 0.003;
-        if (!covered) bridge.current.invalidate?.();
+        bridge.current.invalidate?.();
 
         const idx = chapters.findIndex((c) => p >= c.at[0] && p < c.at[1]);
         if (idx !== lastChapter) {
@@ -135,37 +133,31 @@ export default function ArchitecturalJourney({ rooms }: { rooms: RoomSlide[] }) 
       tl.fromTo(flash, { autoAlpha: 0 }, { autoAlpha: 0.5, duration: 0.016 }, 0.566);
       tl.to(flash, { autoAlpha: 0, duration: 0.03 }, 0.584);
 
-      // ---------- interior chapters ----------
+      // ---------- interior chapters: titles over the 3D rooms, dip-to-black at each cut ----------
       const roomsEl = q("[data-rooms]");
-      tl.set(roomsEl, { autoAlpha: 1 }, PHASE.interiors[0]);
-      const roomEls = q("[data-room]");
-      const n = Math.max(roomEls.length, 1);
-      const slot = (PHASE.interiors[1] - PHASE.interiors[0]) / n;
-      roomEls.forEach((room, i) => {
-        const s = PHASE.interiors[0] + i * slot;
-        const media = room.querySelector("[data-room-media]");
+      const windows = [ROOM_WINDOWS.living, ROOM_WINDOWS.kitchen, ROOM_WINDOWS.bedroom, ROOM_WINDOWS.office];
+      tl.set(roomsEl, { autoAlpha: 1 }, windows[0][0]);
+      q("[data-room]").forEach((room, i) => {
+        const [a, b] = windows[Math.min(i, windows.length - 1)];
+        const len = b - a;
         const title = room.querySelector("[data-room-title]");
         const details = room.querySelectorAll("[data-room-kicker], [data-room-text]");
-        tl.fromTo(
-          room,
-          { clipPath: "inset(0% 0% 0% 100%)" },
-          { clipPath: "inset(0% 0% 0% 0%)", duration: slot * 0.38, ease: "power2.inOut" },
-          s,
-        );
-        if (media) {
-          tl.fromTo(media, { scale: 1.28, xPercent: 6 }, { scale: 1.05, xPercent: 0, duration: slot }, s);
-          if (i < n - 1) tl.to(media, { xPercent: -12, scale: 1.0, duration: slot * 0.38, ease: "power2.inOut" }, s + slot);
-        }
-        if (title)
-          tl.fromTo(title, { yPercent: 105 }, { yPercent: 0, duration: slot * 0.3, ease: "power3.out" }, s + slot * 0.16);
+        tl.fromTo(room, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.008 }, a + 0.004);
+        if (title) tl.fromTo(title, { yPercent: 105 }, { yPercent: 0, duration: len * 0.3, ease: "power3.out" }, a + len * 0.1);
         tl.fromTo(
           details,
           { autoAlpha: 0, y: 20 },
-          { autoAlpha: 1, y: 0, duration: slot * 0.22, stagger: slot * 0.05 },
-          s + slot * 0.26,
+          { autoAlpha: 1, y: 0, duration: len * 0.2, stagger: len * 0.05 },
+          a + len * 0.2,
         );
+        tl.to(room, { autoAlpha: 0, duration: 0.008 }, b - 0.012);
       });
-      tl.to(roomsEl, { autoAlpha: 0, duration: 0.03 }, PHASE.final[0]);
+      tl.to(roomsEl, { autoAlpha: 0, duration: 0.01 }, PHASE.final[0]);
+      const dip = q("[data-dip]");
+      for (const [, cut] of windows) {
+        tl.to(dip, { autoAlpha: 1, duration: 0.006 }, cut - 0.006);
+        tl.to(dip, { autoAlpha: 0, duration: 0.01 }, cut);
+      }
 
       // ---------- final reveal ----------
       tl.set(q("[data-final]"), { autoAlpha: 1 }, PHASE.final[0] + 0.004);
@@ -215,6 +207,7 @@ export default function ArchitecturalJourney({ rooms }: { rooms: RoomSlide[] }) 
         />
         <div data-flash aria-hidden className="pointer-events-none invisible absolute inset-0 bg-[#f7e7cf] opacity-0" />
         <InteriorRevealScene rooms={rooms} />
+        <div data-dip aria-hidden className="pointer-events-none invisible absolute inset-0 bg-navy-deep opacity-0" />
 
         {captionChapters.map((c, i) => (
           <SceneCaption key={c.id} chapter={c} first={i === 0} />

@@ -1,7 +1,7 @@
 /**
  * DOM layer for the drawing phase: sheet border, title block, north arrow and
  * registration marks. Animated by the journey timeline via data attributes.
- * The 3D floor plan itself is drawn in WebGL (see three/buildHouse.ts).
+ * The 3D floor plan itself is drawn in WebGL (see three/house.ts).
  */
 export default function BlueprintScene() {
   return (

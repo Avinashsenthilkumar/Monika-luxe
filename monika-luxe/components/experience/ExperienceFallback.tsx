@@ -44,15 +44,17 @@ export default function ExperienceFallback({ rooms }: { rooms: RoomSlide[] }) {
           <div className="mt-14 grid gap-6 md:grid-cols-2">
             {rooms.map((room) => (
               <Link key={room.id} href={room.href} className="group block">
-                <div className="relative aspect-[4/3] overflow-hidden bg-navy">
-                  <Image
-                    src={room.image.src}
-                    alt={room.image.alt}
-                    fill
-                    sizes="(min-width: 768px) 50vw, 100vw"
-                    className="object-cover"
-                  />
-                </div>
+                {room.image && (
+                  <div className="relative aspect-[4/3] overflow-hidden bg-navy">
+                    <Image
+                      src={room.image.src}
+                      alt={room.image.alt}
+                      fill
+                      sizes="(min-width: 768px) 50vw, 100vw"
+                      className="object-cover"
+                    />
+                  </div>
+                )}
                 <div className="mt-4 flex items-baseline justify-between gap-4">
                   <h3 className="font-sans text-3xl font-extralight uppercase">{room.title}</h3>
                   <span className="eyebrow text-gold">View →</span>
