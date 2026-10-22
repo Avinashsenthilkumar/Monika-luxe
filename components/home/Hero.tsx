@@ -177,13 +177,13 @@ export default function Hero() {
         <div className="animate-fade mt-10 flex flex-wrap gap-4 [animation-delay:1100ms]">
           <Link
             href="#journey"
-            className="inline-flex min-h-12 items-center gap-3 border border-white/35 px-7 text-[0.75rem] uppercase tracking-[0.2em] transition-colors hover:border-gold hover:text-gold"
+            className="inline-flex min-h-12 w-full items-center justify-center gap-3 sm:w-auto border border-white/35 px-7 text-[0.75rem] uppercase tracking-[0.2em] transition-colors hover:border-gold hover:text-gold"
           >
             Discover Our Approach <span aria-hidden>↓</span>
           </Link>
           <Link
             href="/contact#enquiry"
-            className="inline-flex min-h-12 items-center gap-3 bg-gold px-7 text-[0.75rem] uppercase tracking-[0.2em] text-navy-deep transition-colors hover:bg-white"
+            className="inline-flex min-h-12 w-full items-center justify-center gap-3 sm:w-auto bg-gold px-7 text-[0.75rem] uppercase tracking-[0.2em] text-navy-deep transition-colors hover:bg-white"
           >
             Start Your Project <span aria-hidden>→</span>
           </Link>

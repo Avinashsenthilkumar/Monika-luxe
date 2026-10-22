@@ -66,7 +66,7 @@ export default function MobileNavigation({
         open ? "[clip-path:inset(0_0_0_0)]" : "pointer-events-none [clip-path:inset(0_0_100%_0)]",
       )}
     >
-      <div className="container-luxe flex items-center justify-between py-6">
+      <div className="container-luxe flex items-center justify-between pb-4 pt-[calc(env(safe-area-inset-top,0px)+1rem)]">
         <span className="flex items-center gap-3">
           <Image src="/brand/monika-luxe-mark.png" alt="" width={146} height={138} className="h-10 w-auto" />
           <span className="font-serif text-[1.35rem] tracking-[0.2em] text-gold">MONIKA LUXE</span>
@@ -98,7 +98,7 @@ export default function MobileNavigation({
         </ul>
       </nav>
 
-      <div className="container-luxe flex flex-col gap-3 pb-10 pt-6 text-sm text-white/70">
+      <div className="container-luxe flex flex-col gap-3 pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] pt-6 text-sm text-white/70">
         <Link
           href="/contact#enquiry"
           onClick={onClose}

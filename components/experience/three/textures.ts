@@ -330,7 +330,7 @@ export interface MaterialTextures {
 }
 
 export function createTextures(quality: "high" | "low"): MaterialTextures {
-  const s = quality === "high" ? 1024 : 512;
+  const s = quality === "high" ? 1024 : 768;
   const a = quality === "high" ? 8 : 4;
   const t = {
     teak: make(s, s, 11, teak, a),

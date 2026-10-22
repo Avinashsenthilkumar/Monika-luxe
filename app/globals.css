@@ -275,3 +275,15 @@ html[data-intro-seen] .intro-overlay {
     color: transparent;
   }
 }
+
+/* ---------------- App-like behaviour on phones ---------------- */
+html {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+@media (max-width: 1023px) {
+  a,
+  button {
+    touch-action: manipulation;
+  }
+}

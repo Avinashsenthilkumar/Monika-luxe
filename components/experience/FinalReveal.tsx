@@ -8,7 +8,7 @@ export default function FinalReveal() {
         aria-hidden
         className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-navy-deep/70 to-transparent md:hidden"
       />
-      <div className="container-luxe relative pb-28 md:pb-0">
+      <div className="container-luxe relative pb-[calc(env(safe-area-inset-bottom,0px)+7rem)] md:pb-0">
         <p data-final-item className="eyebrow mb-6 flex items-center gap-3 text-gold">
           <span>06</span>
           <span aria-hidden className="h-px w-8 bg-current" />
@@ -23,13 +23,13 @@ export default function FinalReveal() {
         <div data-final-item className="mt-10 flex flex-wrap gap-4">
           <Link
             href="/contact#enquiry"
-            className="inline-flex min-h-12 items-center gap-3 bg-gold px-7 text-[0.75rem] uppercase tracking-[0.2em] text-navy-deep transition-colors hover:bg-white"
+            className="inline-flex min-h-12 w-full items-center justify-center gap-3 sm:w-auto bg-gold px-7 text-[0.75rem] uppercase tracking-[0.2em] text-navy-deep transition-colors hover:bg-white"
           >
             Start Your Project <span aria-hidden>→</span>
           </Link>
           <Link
             href="/projects"
-            className="inline-flex min-h-12 items-center gap-3 border border-white/40 px-7 text-[0.75rem] uppercase tracking-[0.2em] text-white transition-colors hover:border-gold hover:text-gold"
+            className="inline-flex min-h-12 w-full items-center justify-center gap-3 sm:w-auto border border-white/40 px-7 text-[0.75rem] uppercase tracking-[0.2em] text-white transition-colors hover:border-gold hover:text-gold"
           >
             Explore Our Work
           </Link>

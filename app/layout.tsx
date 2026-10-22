@@ -7,6 +7,7 @@ import SmoothScroll from "@/components/layout/SmoothScroll";
 import ScrollProgress from "@/components/layout/ScrollProgress";
 import LoadingScreen, { INTRO_SCRIPT } from "@/components/layout/LoadingScreen";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
+import MobileTabBar from "@/components/layout/MobileTabBar";
 import { company, siteUrl } from "@/lib/content";
 import { localBusinessJsonLd } from "@/lib/seo";
 
@@ -28,12 +29,14 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image" },
   formatDetection: { telephone: false },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Monika Luxe" },
 };
 
 export const viewport: Viewport = {
   themeColor: "#06122a",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -42,7 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT }} />
       </head>
-      <body>
+      <body className="pb-[calc(env(safe-area-inset-bottom,0px)+4rem)] lg:pb-0">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd()) }} />
         <LoadingScreen />
         <SmoothScroll>
@@ -53,6 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </main>
           <Footer />
           <WhatsAppButton />
+          <MobileTabBar />
         </SmoothScroll>
       </body>
     </html>

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
-import { useMediaQuery, usePrefersReducedMotion, useWebGLSupport } from "@/lib/hooks";
+import { useMediaQuery, useWebGLSupport } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 import BlueprintScene from "./BlueprintScene";
 import { chapters, PHASE, ROOM_WINDOWS } from "./chapters";
@@ -30,7 +30,6 @@ export default function ArchitecturalJourney({
   /** when a rendered walkthrough exists, it replaces the real-time 3D model */
   sequence?: SequenceManifest | null;
 }) {
-  const reduced = usePrefersReducedMotion();
   const webgl = useWebGLSupport();
   const isMobile = useMediaQuery("(max-width: 767px)");
   const [failed, setFailed] = useState(false);
@@ -42,7 +41,9 @@ export default function ArchitecturalJourney({
   const stage = useRef<HTMLDivElement>(null);
   const bridge = useRef<SceneBridge>({ progress: 0 });
 
-  const useFallback = reduced || failed || (!sequence && webgl === false);
+  // The film is driven by the visitor's own scrolling (nothing autoplays), so it stays on
+  // even with "Reduce motion"; only a missing/failed WebGL falls back to the static story.
+  const useFallback = failed || (!sequence && webgl === false);
 
   const onReady = useCallback(() => setReady(true), []);
   const onError = useCallback(() => setFailed(true), []);
@@ -102,6 +103,8 @@ export default function ArchitecturalJourney({
 
       // ---------- progress → 3D, chapter index, colour tone ----------
       const items = q("[data-progress-item]");
+      const pill = q("[data-chapter-pill]")[0] as HTMLElement | undefined;
+      const bar = q("[data-film-bar]")[0] as HTMLElement | undefined;
       let lastChapter = -1;
       let lastTone = "";
       const sync = () => {
@@ -113,7 +116,10 @@ export default function ArchitecturalJourney({
         if (idx !== lastChapter) {
           lastChapter = idx;
           items.forEach((el, i) => el.setAttribute("data-active", String(i === idx)));
+          const c = chapters[idx];
+          if (pill && c) pill.textContent = `${c.index} · ${c.label}`;
         }
+        if (bar) bar.style.transform = `scaleX(${p})`;
         const tone = p < 0.46 ? "ink" : "ivory";
         if (tone !== lastTone) {
           lastTone = tone;
@@ -229,6 +235,17 @@ export default function ArchitecturalJourney({
 
         <FinalReveal />
         <JourneyProgress />
+        {/* phone: chapter pill + progress bar so the story reads clearly on a small screen */}
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[3px] bg-navy/10 md:hidden">
+          <div data-film-bar className="h-full origin-left scale-x-0 bg-gold" />
+        </div>
+        <div
+          data-chapter-pill
+          aria-hidden
+          className="eyebrow pointer-events-none absolute left-1/2 top-[calc(env(safe-area-inset-top,0px)+4.75rem)] z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-navy-deep/85 px-4 py-2 text-[0.62rem] text-white md:hidden"
+        >
+          01 · Blueprint
+        </div>
 
         <div
           data-scroll-hint
@@ -241,7 +258,7 @@ export default function ArchitecturalJourney({
 
         <a
           href="#studio"
-          className="eyebrow absolute bottom-6 right-24 z-10 border-b border-current/40 pb-1 text-navy transition-colors hover:text-gold group-data-[tone=ivory]/stage:text-white md:bottom-10 md:right-32"
+          className="eyebrow absolute bottom-6 right-24 z-10 hidden md:block border-b border-current/40 pb-1 text-navy transition-colors hover:text-gold group-data-[tone=ivory]/stage:text-white md:bottom-10 md:right-32"
         >
           Skip the film ↓
         </a>

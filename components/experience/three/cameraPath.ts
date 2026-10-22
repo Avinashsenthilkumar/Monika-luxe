@@ -108,10 +108,10 @@ export function createCameraPath(rooms: RoomsRig) {
 
       // Portrait screens: pull exterior shots back and widen interiors.
       if (aspect < 1.25 && exterior > 0) {
-        offset.subVectors(pos, target).multiplyScalar(1 + (1.25 - aspect) * 1.1 * exterior);
+        offset.subVectors(pos, target).multiplyScalar(1 + (1.25 - aspect) * 0.35 * exterior);
         pos.copy(target).add(offset);
       }
-      if (aspect < 1) fov += 10;
+      if (aspect < 1) fov += 12;
 
       camera.position.copy(pos);
       camera.lookAt(target);

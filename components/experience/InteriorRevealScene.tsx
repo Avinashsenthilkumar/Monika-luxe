@@ -21,7 +21,7 @@ export default function InteriorRevealScene({ rooms }: { rooms: RoomSlide[] }) {
       {rooms.map((room, i) => (
         <div key={room.id} data-room={i} className="invisible absolute inset-0 opacity-0">
           <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-navy-deep/85 via-navy-deep/30 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 px-4 pb-24 md:px-14 md:pb-20">
+          <div className="absolute inset-x-0 bottom-0 px-4 pb-[calc(env(safe-area-inset-bottom,0px)+6.5rem)] md:px-14 md:pb-20">
             <p data-room-kicker className="eyebrow mb-4 flex items-center gap-3 text-gold">
               <span>
                 05 · {String(i + 1).padStart(2, "0")} / {String(rooms.length).padStart(2, "0")}

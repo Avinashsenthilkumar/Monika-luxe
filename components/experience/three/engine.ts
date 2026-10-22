@@ -23,15 +23,16 @@ export interface Engine {
 export function createEngine(container: HTMLElement, quality: "high" | "low", onError?: () => void): Engine {
   const high = quality === "high";
   const renderer = new THREE.WebGLRenderer({
-    antialias: high,
+    antialias: true,
     powerPreference: "high-performance",
     alpha: false,
     stencil: false,
   });
   const cores = navigator.hardwareConcurrency || 4;
-  const maxDpr = high ? (cores >= 8 ? 1.5 : 1.25) : 1;
+  // Phones get a crisp (high-DPR) but light pipeline: no shadows, no dynamic lights.
+  const maxDpr = high ? (cores >= 8 ? 1.5 : 1.25) : 1.75;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxDpr));
-  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.enabled = high;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   // The scene is static most of the time: shadows are re-rendered only while things move or lights change.
   renderer.shadowMap.autoUpdate = false;
@@ -72,6 +73,16 @@ export function createEngine(container: HTMLElement, quality: "high" | "low", on
   const sky = createSky();
   scene.add(house.root);
   for (const set of Object.values(rooms.sets)) scene.add(set.group);
+  // Keep the sun outside the villa group so the light count never changes between shots
+  // (a changing light count forces shader recompiles, which shows up as a stutter).
+  scene.add(house.sun, house.sun.target);
+  if (!high) {
+    const removable: THREE.Object3D[] = [];
+    scene.traverse((o) => {
+      if ((o as THREE.PointLight).isPointLight || (o as THREE.SpotLight).isSpotLight) removable.push(o);
+    });
+    removable.forEach((o) => o.parent?.remove(o));
+  }
   scene.background = sky.texture;
 
   const fog = new THREE.Fog("#f7f8fa", 90, 240);
@@ -130,7 +141,7 @@ export function createEngine(container: HTMLElement, quality: "high" | "low", on
     sunDir.lerpVectors(sunDay, sunDusk, dusk);
     house.sun.position.copy(sunDir);
     house.sun.color.copy(sunColDay).lerp(sunColDusk, dusk);
-    house.sun.intensity = 2.8 - dusk * 1.9;
+    house.sun.intensity = active ? 0 : 2.8 - dusk * 1.9;
     house.hemi.color.copy(hemiSkyDay).lerp(hemiSkyDusk, dusk);
     house.hemi.groundColor.copy(hemiGrDay).lerp(hemiGrDusk, dusk);
     house.hemi.intensity = 1.4 - dusk * 1.05;
@@ -145,7 +156,7 @@ export function createEngine(container: HTMLElement, quality: "high" | "low", on
       fog.near = 90 - dusk * 30;
       fog.far = 240 - dusk * 60;
     }
-    scene.environmentIntensity = active ? 0.45 : 0.55 - dusk * 0.25;
+    scene.environmentIntensity = high ? (active ? 0.45 : 0.55 - dusk * 0.25) : active ? 1.0 : 0.7 - dusk * 0.25;
     renderer.toneMappingExposure = active ? 1.08 : 1;
 
     // artificial lighting
@@ -180,6 +191,17 @@ export function createEngine(container: HTMLElement, quality: "high" | "low", on
   }
 
   resize();
+
+  // Warm up every shader configuration once so the first cut into each room doesn't stutter.
+  try {
+    for (const cfg of [null, ...roomIds] as Array<RoomId | null>) {
+      house.root.visible = cfg === null;
+      for (const id of roomIds) rooms.sets[id].group.visible = id === cfg;
+      renderer.compile(scene, camera);
+    }
+  } catch {
+    /* non-fatal */
+  }
 
   const dispose = () => {
     if (frame) cancelAnimationFrame(frame);

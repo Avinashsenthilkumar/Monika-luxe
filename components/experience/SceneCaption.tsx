@@ -7,7 +7,7 @@ export default function SceneCaption({ chapter, first = false }: { chapter: Chap
     <div
       data-caption={chapter.id}
       className={cn(
-        "pointer-events-none absolute bottom-20 left-4 right-4 max-w-xl p-5 md:bottom-16 md:left-10 md:p-7",
+        "pointer-events-none absolute bottom-[calc(env(safe-area-inset-bottom,0px)+5.75rem)] left-4 right-4 max-w-xl p-5 md:bottom-16 md:left-10 md:p-7",
         chapter.tone === "ink" ? "bg-white/90 text-navy" : "bg-navy-deep/70 text-white",
         !first && "invisible opacity-0",
       )}

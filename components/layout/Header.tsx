@@ -38,10 +38,10 @@ export default function Header() {
       </a>
       <header
         className={cn(
-          "fixed inset-x-0 top-0 z-50 text-white transition-[background-color,padding,border-color,backdrop-filter] duration-700 ease-[var(--ease-luxe)]",
+          "fixed inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top,0px)] text-white transition-[background-color,padding,border-color,backdrop-filter] duration-700 ease-[var(--ease-luxe)]",
           compact
             ? "border-b border-line-light bg-navy-deep/95 py-3"
-            : "border-b border-transparent bg-gradient-to-b from-navy-deep/60 to-transparent py-6 md:py-8",
+            : "border-b border-transparent bg-gradient-to-b from-navy-deep/60 to-transparent py-4 md:py-8",
         )}
       >
         <div className="container-luxe flex items-center justify-between gap-6">
@@ -52,7 +52,7 @@ export default function Header() {
               width={146}
               height={138}
               priority
-              className={cn("w-auto transition-[height] duration-700", compact ? "h-9" : "h-11 md:h-12")}
+              className={cn("w-auto transition-[height] duration-700", compact ? "h-9" : "h-10 md:h-12")}
             />
             <span className="flex flex-col leading-none">
               <span className="font-serif text-[1.35rem] tracking-[0.2em] text-gold md:text-[1.5rem]">MONIKA LUXE</span>
