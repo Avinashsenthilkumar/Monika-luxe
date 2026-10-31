@@ -5,8 +5,8 @@
  *   node scripts/make-sequence.mjs path/to/walkthrough.mp4 [--fps 24] [--blueprint]
  *
  * Needs ffmpeg on your PATH. Writes:
- *   public/sequences/house/desktop/frame_0001.webp …  (1600 px wide)
- *   public/sequences/house/mobile/frame_0001.webp  …  (800 px wide)
+ *   public/sequences/house/desktop/frame_0001.webp …  (1920 px wide)
+ *   public/sequences/house/mobile/frame_0001.webp  …  (1280 px wide)
  *   public/sequences/house/manifest.json
  * The site switches from the real-time 3D model to these frames automatically.
  */
@@ -30,8 +30,8 @@ if (!input || !fs.existsSync(input)) {
 const out = path.join(root, "public", "sequences", "house");
 fs.rmSync(out, { recursive: true, force: true });
 for (const [dir, width, q] of [
-  ["desktop", 1600, 72],
-  ["mobile", 800, 65],
+  ["desktop", 1920, 78],
+  ["mobile", 1280, 74],
 ]) {
   const target = path.join(out, dir);
   fs.mkdirSync(target, { recursive: true });
@@ -44,7 +44,7 @@ for (const [dir, width, q] of [
       "-i",
       input,
       "-vf",
-      `fps=${fps},scale=${width}:-2:flags=lanczos`,
+      `fps=${fps},scale=${width}:-2:flags=lanczos,unsharp=5:5:0.7:3:3:0.0`,
       "-c:v",
       "libwebp",
       "-quality",

@@ -1,0 +1,8 @@
+{
+  "frames": 480,
+  "path": "/sequences/house/desktop/frame_%04d.webp",
+  "mobilePath": "/sequences/house/mobile/frame_%04d.webp",
+  "width": 1280,
+  "height": 720,
+  "blueprintSheet": false
+}

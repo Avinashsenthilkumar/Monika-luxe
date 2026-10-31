@@ -6,7 +6,7 @@ import { gsap, useGSAP } from "@/lib/gsap";
 import { useMediaQuery, useWebGLSupport } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 import BlueprintScene from "./BlueprintScene";
-import { chapters, PHASE, ROOM_WINDOWS } from "./chapters";
+import { chapters as modelChapters, PHASE, ROOM_WINDOWS, SEQUENCE_CHAPTERS } from "./chapters";
 import ExperienceFallback from "./ExperienceFallback";
 import FinalReveal from "./FinalReveal";
 import InteriorRevealScene, { type RoomSlide } from "./InteriorRevealScene";
@@ -19,8 +19,6 @@ import type { SequenceManifest } from "@/lib/sequence";
 // Three.js is split into its own chunk and never rendered on the server.
 const HouseConstructionScene = dynamic(() => import("./HouseConstructionScene"), { ssr: false });
 const SequenceScene = dynamic(() => import("./SequenceScene"), { ssr: false });
-
-const captionChapters = chapters.filter((c) => c.id !== "interiors" && c.id !== "final");
 
 export default function ArchitecturalJourney({
   rooms,
@@ -44,6 +42,10 @@ export default function ArchitecturalJourney({
   // The film is driven by the visitor's own scrolling (nothing autoplays), so it stays on
   // even with "Reduce motion"; only a missing/failed WebGL falls back to the static story.
   const useFallback = failed || (!sequence && webgl === false);
+  // A rendered film has its own storyboard; the 3D model uses the original chapters.
+  const chapters = sequence ? SEQUENCE_CHAPTERS : modelChapters;
+  const captionChapters = chapters.filter((c) => c.id !== "interiors" && c.id !== "final");
+  const finalStart = chapters.find((c) => c.id === "final")?.at[0] ?? PHASE.final[0];
 
   const onReady = useCallback(() => setReady(true), []);
   const onError = useCallback(() => setFailed(true), []);
@@ -93,7 +95,7 @@ export default function ArchitecturalJourney({
         scrollTrigger: {
           trigger: root,
           start: "top top",
-          end: () => `+=${Math.round(window.innerHeight * (isMobile ? 5 : 6))}`,
+          end: () => `+=${Math.round(window.innerHeight * (isMobile ? (sequence ? 6 : 5) : sequence ? 7 : 6))}`,
           pin: stageEl,
           scrub: 0.5,
           anticipatePin: 1,
@@ -104,7 +106,8 @@ export default function ArchitecturalJourney({
       // ---------- progress → 3D, chapter index, colour tone ----------
       const items = q("[data-progress-item]");
       const pill = q("[data-chapter-pill]")[0] as HTMLElement | undefined;
-      const bar = q("[data-film-bar]")[0] as HTMLElement | undefined;
+      const bars = q("[data-film-bar]") as HTMLElement[];
+      const count = q("[data-film-count]")[0] as HTMLElement | undefined;
       let lastChapter = -1;
       let lastTone = "";
       const sync = () => {
@@ -118,9 +121,10 @@ export default function ArchitecturalJourney({
           items.forEach((el, i) => el.setAttribute("data-active", String(i === idx)));
           const c = chapters[idx];
           if (pill && c) pill.textContent = `${c.index} · ${c.label}`;
+          if (count && c) count.textContent = c.index;
         }
-        if (bar) bar.style.transform = `scaleX(${p})`;
-        const tone = p < 0.46 ? "ink" : "ivory";
+        for (const bar of bars) bar.style.transform = `scaleX(${p})`;
+        const tone = sequence ? (chapters[Math.max(idx, 0)]?.tone ?? "ivory") : p < 0.46 ? "ink" : "ivory";
         if (tone !== lastTone) {
           lastTone = tone;
           stageEl.dataset.tone = tone;
@@ -128,10 +132,18 @@ export default function ArchitecturalJourney({
       };
       tl.eventCallback("onUpdate", sync);
 
-      // ---------- blueprint sheet ----------
-      tl.fromTo(q("[data-bp-draw]"), { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.08 }, 0.005);
       tl.to(q("[data-scroll-hint]"), { autoAlpha: 0, duration: 0.02 }, 0.01);
-      tl.to(q("[data-bp-fade]"), { autoAlpha: 0, duration: 0.05, stagger: 0.003 }, PHASE.blueprintFade[0]);
+
+      // ---------- blueprint sheet (3D model only) ----------
+      if (q("[data-bp-draw]").length) {
+        tl.fromTo(
+          q("[data-bp-draw]"),
+          { strokeDasharray: 1, strokeDashoffset: 1 },
+          { strokeDashoffset: 0, duration: 0.08 },
+          0.005,
+        );
+        tl.to(q("[data-bp-fade]"), { autoAlpha: 0, duration: 0.05, stagger: 0.003 }, PHASE.blueprintFade[0]);
+      }
 
       // ---------- captions ----------
       captionChapters.forEach((c, i) => {
@@ -140,54 +152,60 @@ export default function ArchitecturalJourney({
         tl.to(el, { autoAlpha: 0, y: -30, duration: 0.02 }, c.at[1] - 0.024);
       });
 
-      // ---------- dusk scrim keeps ivory captions legible ----------
-      tl.fromTo(q("[data-scrim]"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.05 }, 0.43);
+      if (!sequence) {
+        // ---------- dusk scrim keeps ivory captions legible ----------
+        tl.fromTo(q("[data-scrim]"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.05 }, 0.43);
 
-      // ---------- passing through the glass ----------
-      const flash = q("[data-flash]");
-      tl.fromTo(flash, { autoAlpha: 0 }, { autoAlpha: 0.5, duration: 0.016 }, 0.566);
-      tl.to(flash, { autoAlpha: 0, duration: 0.03 }, 0.584);
+        // ---------- passing through the glass ----------
+        const flash = q("[data-flash]");
+        tl.fromTo(flash, { autoAlpha: 0 }, { autoAlpha: 0.5, duration: 0.016 }, 0.566);
+        tl.to(flash, { autoAlpha: 0, duration: 0.03 }, 0.584);
 
-      // ---------- interior chapters: titles over the 3D rooms, dip-to-black at each cut ----------
-      const roomsEl = q("[data-rooms]");
-      const windows = [ROOM_WINDOWS.living, ROOM_WINDOWS.kitchen, ROOM_WINDOWS.bedroom, ROOM_WINDOWS.office];
-      tl.set(roomsEl, { autoAlpha: 1 }, windows[0][0]);
-      q("[data-room]").forEach((room, i) => {
-        const [a, b] = windows[Math.min(i, windows.length - 1)];
-        const len = b - a;
-        const title = room.querySelector("[data-room-title]");
-        const details = room.querySelectorAll("[data-room-kicker], [data-room-text]");
-        tl.fromTo(room, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.008 }, a + 0.004);
-        if (title) tl.fromTo(title, { yPercent: 105 }, { yPercent: 0, duration: len * 0.3, ease: "power3.out" }, a + len * 0.1);
-        tl.fromTo(
-          details,
-          { autoAlpha: 0, y: 20 },
-          { autoAlpha: 1, y: 0, duration: len * 0.2, stagger: len * 0.05 },
-          a + len * 0.2,
-        );
-        tl.to(room, { autoAlpha: 0, duration: 0.008 }, b - 0.012);
-      });
-      tl.to(roomsEl, { autoAlpha: 0, duration: 0.01 }, PHASE.final[0]);
-      const dip = q("[data-dip]");
-      for (const [, cut] of windows) {
-        tl.to(dip, { autoAlpha: 1, duration: 0.006 }, cut - 0.006);
-        tl.to(dip, { autoAlpha: 0, duration: 0.01 }, cut);
+        // ---------- interior chapters: titles over the 3D rooms, dip-to-black at each cut ----------
+        const roomsEl = q("[data-rooms]");
+        const windows = [ROOM_WINDOWS.living, ROOM_WINDOWS.kitchen, ROOM_WINDOWS.bedroom, ROOM_WINDOWS.office];
+        tl.set(roomsEl, { autoAlpha: 1 }, windows[0][0]);
+        q("[data-room]").forEach((room, i) => {
+          const [a, b] = windows[Math.min(i, windows.length - 1)];
+          const len = b - a;
+          const title = room.querySelector("[data-room-title]");
+          const details = room.querySelectorAll("[data-room-kicker], [data-room-text]");
+          tl.fromTo(room, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.008 }, a + 0.004);
+          if (title) tl.fromTo(title, { yPercent: 105 }, { yPercent: 0, duration: len * 0.3, ease: "power3.out" }, a + len * 0.1);
+          tl.fromTo(
+            details,
+            { autoAlpha: 0, y: 20 },
+            { autoAlpha: 1, y: 0, duration: len * 0.2, stagger: len * 0.05 },
+            a + len * 0.2,
+          );
+          tl.to(room, { autoAlpha: 0, duration: 0.008 }, b - 0.012);
+        });
+        tl.to(roomsEl, { autoAlpha: 0, duration: 0.01 }, PHASE.final[0]);
+        const dip = q("[data-dip]");
+        for (const [, cut] of windows) {
+          tl.to(dip, { autoAlpha: 1, duration: 0.006 }, cut - 0.006);
+          tl.to(dip, { autoAlpha: 0, duration: 0.01 }, cut);
+        }
       }
 
       // ---------- final reveal ----------
-      tl.set(q("[data-final]"), { autoAlpha: 1 }, PHASE.final[0] + 0.004);
+      if (sequence && isMobile) {
+        // phone: dim the film screen so the closing headline and buttons read cleanly over it
+        tl.to(q("[data-scene], [data-film-ui], [data-chapter-pill]"), { autoAlpha: 0.28, duration: 0.03 }, finalStart);
+      }
+      tl.set(q("[data-final]"), { autoAlpha: 1 }, finalStart + 0.004);
       tl.fromTo(
         q("[data-final-item]"),
         { autoAlpha: 0, y: 40 },
         { autoAlpha: 1, y: 0, duration: 0.03, stagger: 0.008, ease: "power2.out" },
-        PHASE.final[0] + 0.012,
+        finalStart + 0.012,
       );
 
       // Pin the timeline length to exactly 1 so positions above equal scroll progress.
       tl.set({}, {}, 1);
       sync();
     },
-    { scope: section, dependencies: [useFallback, isMobile, rooms.length], revertOnUpdate: true },
+    { scope: section, dependencies: [useFallback, isMobile, rooms.length, sequence], revertOnUpdate: true },
   );
 
   if (useFallback) return <ExperienceFallback rooms={rooms} />;
@@ -195,11 +213,11 @@ export default function ArchitecturalJourney({
   return (
     <section ref={section} id="journey" aria-label="From blueprint to finished home" className="relative bg-white">
       <p className="sr-only">
-        A scroll-driven film: a floor plan is drawn, the structure rises, stone, timber and glass are applied, the lights come on
-        at dusk and the camera enters the home, followed by photographs of our kitchens, bedrooms, workspaces and living rooms.
+        A scroll-driven film of a house being built — site, foundation and steel, structure, roof and finishes — then a walk
+        through the finished home: living room, dining and kitchen.
       </p>
       <div ref={stage} data-tone="ink" className="group/stage relative h-svh w-full overflow-hidden bg-white">
-        <div className="absolute inset-0">
+        <div data-scene className="absolute inset-0">
           {mountScene &&
             (sequence ? (
               <SequenceScene bridge={bridge} sequence={sequence} mobile={isMobile} onReady={onReady} />
@@ -212,39 +230,74 @@ export default function ArchitecturalJourney({
         <div
           aria-hidden
           className={cn(
-            "blueprint-grid pointer-events-none absolute inset-0 flex items-center justify-center bg-white transition-opacity duration-1000",
+            "pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-1000",
+            sequence ? "bg-navy-deep" : "blueprint-grid bg-white",
             ready ? "opacity-0" : "opacity-100",
           )}
         >
-          <PlanDrawing className="h-[62%] w-auto max-w-[88%] opacity-70" />
+          {sequence ? (
+            <span className="eyebrow animate-pulse text-white/60">Loading the film…</span>
+          ) : (
+            <PlanDrawing className="h-[62%] w-auto max-w-[88%] opacity-70" />
+          )}
         </div>
 
         {(!sequence || sequence.blueprintSheet) && <BlueprintScene />}
-        <div
-          data-scrim
-          aria-hidden
-          className="pointer-events-none invisible absolute inset-0 bg-[radial-gradient(ellipse_at_10%_95%,rgba(6,18,42,0.7),transparent_60%)] opacity-0"
-        />
-        <div data-flash aria-hidden className="pointer-events-none invisible absolute inset-0 bg-[#f7e7cf] opacity-0" />
-        <InteriorRevealScene rooms={rooms} />
-        <div data-dip aria-hidden className="pointer-events-none invisible absolute inset-0 bg-navy-deep opacity-0" />
+        {!sequence && (
+          <>
+            <div
+              data-scrim
+              aria-hidden
+              className="pointer-events-none invisible absolute inset-0 bg-[radial-gradient(ellipse_at_10%_95%,rgba(6,18,42,0.7),transparent_60%)] opacity-0"
+            />
+            <div data-flash aria-hidden className="pointer-events-none invisible absolute inset-0 bg-[#f7e7cf] opacity-0" />
+            <InteriorRevealScene rooms={rooms} />
+            <div data-dip aria-hidden className="pointer-events-none invisible absolute inset-0 bg-navy-deep opacity-0" />
+          </>
+        )}
 
         {captionChapters.map((c, i) => (
-          <SceneCaption key={c.id} chapter={c} first={i === 0} />
+          <SceneCaption key={c.id} chapter={c} first={i === 0} film={Boolean(sequence)} />
         ))}
 
         <FinalReveal />
-        <JourneyProgress />
+        <JourneyProgress items={chapters} onFilm={Boolean(sequence)} />
         {/* phone: chapter pill + progress bar so the story reads clearly on a small screen */}
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[3px] bg-navy/10 md:hidden">
-          <div data-film-bar className="h-full origin-left scale-x-0 bg-gold" />
-        </div>
+        {sequence ? (
+          // phone: the film plays in this rounded screen (SequenceScene reads its position), with a scrub bar under it
+          <div
+            aria-hidden
+            data-film-ui
+            className="pointer-events-none absolute inset-x-4 top-[calc(env(safe-area-inset-top,0px)+7.25rem)] z-10 flex flex-col md:hidden"
+          >
+            <div
+              data-film-frame
+              className="h-[clamp(12rem,calc(100svh_-_27rem_-_env(safe-area-inset-top,0px)_-_env(safe-area-inset-bottom,0px)),calc((100vw_-_2rem)_*_1.1))] rounded-[18px] shadow-[0_24px_60px_-20px_rgba(0,0,0,0.75)]"
+            />
+            <div className="mt-3 flex items-center gap-3 font-mono text-[0.6rem] tracking-[0.2em] text-white/55">
+              <span data-film-count className="text-gold-light">
+                {chapters[0].index}
+              </span>
+              <span className="relative h-[2px] flex-1 overflow-hidden rounded-full bg-white/15">
+                <span data-film-bar className="absolute inset-0 origin-left scale-x-0 rounded-full bg-gold" />
+              </span>
+              <span>{chapters[chapters.length - 1].index}</span>
+            </div>
+          </div>
+        ) : (
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[3px] bg-navy/10 md:hidden">
+            <div data-film-bar className="h-full origin-left scale-x-0 bg-gold" />
+          </div>
+        )}
         <div
           data-chapter-pill
           aria-hidden
-          className="eyebrow pointer-events-none absolute left-1/2 top-[calc(env(safe-area-inset-top,0px)+4.75rem)] z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-navy-deep/85 px-4 py-2 text-[0.62rem] text-white md:hidden"
+          className={cn(
+            "eyebrow pointer-events-none absolute left-1/2 top-[calc(env(safe-area-inset-top,0px)+4.75rem)] z-10 -translate-x-1/2 whitespace-nowrap rounded-full px-4 py-2 text-[0.62rem] md:hidden",
+            sequence ? "border border-gold/45 bg-navy-deep/60 text-gold-light" : "bg-navy-deep/85 text-white",
+          )}
         >
-          01 · Blueprint
+          {chapters[0].index} · {chapters[0].label}
         </div>
 
         <div
@@ -252,7 +305,7 @@ export default function ArchitecturalJourney({
           aria-hidden
           className="pointer-events-none absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 text-navy md:flex"
         >
-          <span className="eyebrow">Scroll to build</span>
+          <span className={cn("eyebrow", sequence && "text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.6)]")}>Scroll to build</span>
           <span className="block h-10 w-px bg-navy/60 animate-scroll-cue" />
         </div>
 
