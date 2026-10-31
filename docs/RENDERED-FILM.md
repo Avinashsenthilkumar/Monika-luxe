@@ -1,5 +1,8 @@
 # Photoreal home-page film (rendered walkthrough)
 
+> **Current film:** `home_exterior.mp4` (construction time-lapse) + `home_interior.mp4` (walk-through), 20 s · 480 frames.
+> Its captions and timings live in `SEQUENCE_CHAPTERS` (`components/experience/chapters.ts`); re-time them if the video changes.
+
 The real-time 3D house is built in code, so it can never look like a real photographed home. For the realism in the
 reference videos, render the walkthrough once (photoreal) and let the site play it frame by frame as visitors scroll.
 Scrolling stays smooth on every phone because the browser only draws images; it never renders 3D.

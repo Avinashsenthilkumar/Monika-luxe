@@ -90,3 +90,92 @@ export const chapters: Chapter[] = [
     tone: "ivory",
   },
 ];
+
+/**
+ * Chapters for the rendered walkthrough (public/sequences/house): construction
+ * time-lapse (first 10 s) followed by the interior walk-through (next 10 s).
+ * `at` is the share of the film / scroll distance. Re-time these if the video changes.
+ */
+export const SEQUENCE_CHAPTERS: Chapter[] = [
+  {
+    id: "site",
+    index: "01",
+    label: "Site",
+    title: "Every home begins with the ground.",
+    text: "Site clearing, surveying and excavation set the footprint of the house.",
+    at: [0, 0.07],
+    tone: "ink",
+  },
+  {
+    id: "foundation",
+    index: "02",
+    label: "Foundation",
+    title: "Steel, concrete, foundation.",
+    text: "Reinforcement rods are tied and concrete is poured — the strength you never see.",
+    at: [0.07, 0.19],
+    tone: "ink",
+  },
+  {
+    id: "structure",
+    index: "03",
+    label: "Structure",
+    title: "Columns and walls rise.",
+    text: "Engineered column, beam and wall work, supervised on site every day.",
+    at: [0.19, 0.3],
+    tone: "ink",
+  },
+  {
+    id: "roof",
+    index: "04",
+    label: "Roof",
+    title: "Roof, scaffolding, stone.",
+    text: "The roof structure goes up and the facade takes shape, detail by detail.",
+    at: [0.3, 0.41],
+    tone: "ink",
+  },
+  {
+    id: "finished",
+    index: "05",
+    label: "Finished",
+    title: "The finished home.",
+    text: "Stone, timber, glass and landscape — complete, and lit for the evening.",
+    at: [0.41, 0.56],
+    tone: "ivory",
+  },
+  {
+    id: "enter",
+    index: "06",
+    label: "Welcome",
+    title: "Welcome home.",
+    text: "Through the front door, into spaces designed around the way you live.",
+    at: [0.56, 0.66],
+    tone: "ivory",
+  },
+  {
+    id: "living",
+    index: "07",
+    label: "Living",
+    title: "The living room.",
+    text: "Double-height volume, a floating staircase and a stone fireplace wall.",
+    at: [0.66, 0.81],
+    tone: "ivory",
+  },
+  {
+    id: "kitchen",
+    index: "08",
+    label: "Kitchen",
+    title: "Dining & modular kitchen.",
+    text: "Warm wood, marble and smart storage, made for everyday family life.",
+    at: [0.81, 0.92],
+    tone: "ivory",
+  },
+  {
+    id: "final",
+    index: "09",
+    label: "Reveal",
+    title: "Your Vision. Our Craft.",
+    text: "",
+    at: [0.92, 1.0001],
+    tone: "ivory",
+  },
+];
