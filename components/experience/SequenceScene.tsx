@@ -9,9 +9,12 @@ import type { SceneBridge } from "./HouseConstructionScene";
  * Blender or an AI video) in sync with scroll. Frames stream in coarse-to-fine
  * so the film is scrubbable within a second and sharpens as the rest arrive.
  *
- * Landscape screens: full-bleed cover. Portrait phones: the film plays inside a
- * rounded "screen" (positioned by the [data-film-frame] element, so CSS owns the
- * layout) over a soft, blurred copy of the same frame — no harsh letterboxing.
+ * Clips can be landscape or portrait. When a frame's shape matches the screen it plays
+ * full-bleed; when it doesn't, it plays inside a rounded "screen" over a soft, blurred
+ * copy of itself — no harsh letterboxing:
+ *  · landscape clip on a phone → the [data-film-frame] slot (CSS owns that layout)
+ *  · portrait clip on a desktop → a tall card right of centre, clear of the captions
+ * The stage gets data-frame="card" | "full" so the overlay UI can follow along.
  */
 export default function SequenceScene({
   bridge,
@@ -44,8 +47,10 @@ export default function SequenceScene({
     let lastDrawn = -1;
     let readyFired = false;
     let dpr = 1;
-    // portrait "screen" rectangle in canvas pixels, or null for full-bleed
-    let card: { x: number; y: number; w: number; h: number; r: number } | null = null;
+    // phone "screen" slot in canvas pixels, or null on landscape screens
+    let slot: { x: number; y: number; w: number; h: number; r: number } | null = null;
+    let lastMode = "";
+    const stage = canvas.parentElement?.parentElement;
 
     const nearestLoaded = (i: number) => {
       for (let d = 0; d < n; d++) {
@@ -82,6 +87,19 @@ export default function SequenceScene({
       const cw = canvas.width;
       const ch = canvas.height;
 
+      const iw = img.naturalWidth;
+      const ih = img.naturalHeight;
+      const screenPortrait = cw / ch < 0.85;
+      const framePortrait = iw < ih;
+      let card: { x: number; y: number; w: number; h: number; r: number } | null = null;
+      if (screenPortrait && !framePortrait) card = slot;
+      else if (!screenPortrait && framePortrait) {
+        // sits below the fixed header, right of the captions
+        const h = ch * 0.8;
+        const w = Math.min((h * iw) / ih, cw * 0.5);
+        card = { x: Math.min(cw * 0.6 - w / 2, cw - w - 160 * dpr), y: ch * 0.13, w, h, r: 18 * dpr };
+      }
+
       if (card) {
         // 1 · blurred, darkened backdrop from the same frame
         if (bctx) {
@@ -113,6 +131,25 @@ export default function SequenceScene({
         ctx.stroke();
       } else {
         cover(img, 0, 0, cw, ch);
+        if (screenPortrait) {
+          // full-screen portrait clip on a phone: shade top and bottom so the header and captions stay readable
+          const top = ctx.createLinearGradient(0, 0, 0, ch * 0.22);
+          top.addColorStop(0, "rgba(6,18,42,0.7)");
+          top.addColorStop(1, "rgba(6,18,42,0)");
+          ctx.fillStyle = top;
+          ctx.fillRect(0, 0, cw, ch * 0.22);
+          const bottom = ctx.createLinearGradient(0, ch * 0.45, 0, ch);
+          bottom.addColorStop(0, "rgba(6,18,42,0)");
+          bottom.addColorStop(0.55, "rgba(6,18,42,0.72)");
+          bottom.addColorStop(1, "rgba(6,18,42,0.95)");
+          ctx.fillStyle = bottom;
+          ctx.fillRect(0, ch * 0.45, cw, ch * 0.55);
+        }
+      }
+      const mode = card ? "card" : "full";
+      if (mode !== lastMode && stage) {
+        lastMode = mode;
+        stage.dataset.frame = mode;
       }
 
       if (!readyFired) {
@@ -130,12 +167,12 @@ export default function SequenceScene({
       canvas.height = Math.round(canvas.clientHeight * dpr);
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
-      card = null;
+      slot = null;
       if (canvas.clientWidth / canvas.clientHeight < 0.85) {
-        const slot = canvas.parentElement?.parentElement?.querySelector<HTMLElement>("[data-film-frame]");
+        const el = stage?.querySelector<HTMLElement>("[data-film-frame]");
         const c = canvas.getBoundingClientRect();
-        const f = slot?.getBoundingClientRect();
-        card =
+        const f = el?.getBoundingClientRect();
+        slot =
           f && f.width > 0
             ? { x: (f.left - c.left) * dpr, y: (f.top - c.top) * dpr, w: f.width * dpr, h: f.height * dpr, r: 18 * dpr }
             : {

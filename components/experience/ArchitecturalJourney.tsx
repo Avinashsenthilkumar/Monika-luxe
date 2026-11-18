@@ -95,7 +95,7 @@ export default function ArchitecturalJourney({
         scrollTrigger: {
           trigger: root,
           start: "top top",
-          end: () => `+=${Math.round(window.innerHeight * (isMobile ? (sequence ? 6 : 5) : sequence ? 7 : 6))}`,
+          end: () => `+=${Math.round(window.innerHeight * (isMobile ? (sequence ? 8 : 5) : sequence ? 9 : 6))}`,
           pin: stageEl,
           scrub: 0.5,
           anticipatePin: 1,
@@ -148,8 +148,12 @@ export default function ArchitecturalJourney({
       // ---------- captions ----------
       captionChapters.forEach((c, i) => {
         const el = q(`[data-caption="${c.id}"]`);
-        if (i > 0) tl.fromTo(el, { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.025 }, c.at[0] + 0.006);
-        tl.to(el, { autoAlpha: 0, y: -30, duration: 0.02 }, c.at[1] - 0.024);
+        // fades scale with the chapter so short rooms still hold their caption on screen
+        const len = c.at[1] - c.at[0];
+        const fadeIn = Math.min(0.025, len * 0.18);
+        const fadeOut = Math.min(0.02, len * 0.15);
+        if (i > 0) tl.fromTo(el, { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: fadeIn }, c.at[0] + 0.004);
+        tl.to(el, { autoAlpha: 0, y: -30, duration: fadeOut }, c.at[1] - fadeOut - 0.002);
       });
 
       if (!sequence) {
@@ -213,8 +217,8 @@ export default function ArchitecturalJourney({
   return (
     <section ref={section} id="journey" aria-label="From blueprint to finished home" className="relative bg-white">
       <p className="sr-only">
-        A scroll-driven film of a house being built — site, foundation and steel, structure, roof and finishes — then a walk
-        through the finished home: living room, dining and kitchen.
+        A scroll-driven film of a house being built — site and column steel, walls, facade and finishes — then a walk
+        through the finished home: entrance, living room, dining and kitchen, bedroom, bathroom, staircase and upper floor.
       </p>
       <div ref={stage} data-tone="ink" className="group/stage relative h-svh w-full overflow-hidden bg-white">
         <div data-scene className="absolute inset-0">
@@ -268,8 +272,10 @@ export default function ArchitecturalJourney({
           <div
             aria-hidden
             data-film-ui
-            className="pointer-events-none absolute inset-x-4 top-[calc(env(safe-area-inset-top,0px)+7.25rem)] z-10 flex flex-col md:hidden"
+            className="pointer-events-none absolute inset-x-4 top-[calc(env(safe-area-inset-top,0px)+7.25rem)] z-10 md:hidden"
           >
+            {/* hidden while a portrait clip fills the whole phone screen */}
+            <div className="flex flex-col transition-opacity duration-300 group-data-[frame=full]/stage:opacity-0">
             <div
               data-film-frame
               className="h-[clamp(12rem,calc(100svh_-_27rem_-_env(safe-area-inset-top,0px)_-_env(safe-area-inset-bottom,0px)),calc((100vw_-_2rem)_*_1.1))] rounded-[18px] shadow-[0_24px_60px_-20px_rgba(0,0,0,0.75)]"
@@ -282,6 +288,7 @@ export default function ArchitecturalJourney({
                 <span data-film-bar className="absolute inset-0 origin-left scale-x-0 rounded-full bg-gold" />
               </span>
               <span>{chapters[chapters.length - 1].index}</span>
+            </div>
             </div>
           </div>
         ) : (
